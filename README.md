@@ -30,7 +30,7 @@ This is still an untested work in progress. Don't use this as a reference.
 | PB3 | Arduino 14       | **Controller Left**  |
 | PB4 | Arduino 8        | **Controller Right** |
 | PB5 | Arduino 9        | **Controller A**     |
-| PB6 | Arduino 16       | **Controller B**     |
+| PB6 | Arduino 10       | **Controller B**     |
 | PB7 | Pin 12 D11       | **Controller C**     |
 
 |PORTC| Arduino          | Usage                |
