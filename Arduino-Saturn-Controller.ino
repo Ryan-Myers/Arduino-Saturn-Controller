@@ -21,6 +21,8 @@
  *  
  */
 
+uint8_t JoystickValues[31];
+
 void setup() 
 {
   //Setup controller pins Up, Down, Left, Right, A, B, C
@@ -45,8 +47,8 @@ void setup()
   
   //Setup Saturn select pins S0 and S1
   //         ------10
-  DDRD  &= ~B00010011; //Set them up as inputs
-  PORTD |=  B00010011; //Enable internal pull-ups
+  DDRD  &= ~B00000011; //Set them up as inputs
+  PORTD |=  B00000011; //Enable internal pull-ups
   
   //Setup Saturn data pins D0, D1, D2, D3, and TL ACK
   //         0123--T-
@@ -62,7 +64,25 @@ void setup()
   EICRA |= bit (ISC10);                 // Set interrupt on rising and falling
   
   // Enable both interrupts
-  EIMSK |= bit(INT0)  | bit(INT1);  
+  EIMSK |= bit(INT0)  | bit(INT1);
+
+  //                    UDLR---
+  JoystickValues[0]  = B0000000; //Nothing
+  JoystickValues[2]  = B1000000; //Up
+  JoystickValues[4]  = B0100000; //Down
+  JoystickValues[6]  = B0010000; //Up-Down
+  JoystickValues[8]  = B0001000; //Left
+  JoystickValues[10] = B1010000; //Up-Left
+  JoystickValues[12] = B0110000; //Down-Left
+  JoystickValues[14] = B1110000; //Up-Down-Left
+  JoystickValues[16] = B0001000; //Right
+  JoystickValues[18] = B1001000; //Up-Right
+  JoystickValues[20] = B0101000; //Down-Right
+  JoystickValues[22] = B1101000; //Up-Down-Right
+  JoystickValues[24] = B0011000; //Left-Right
+  JoystickValues[26] = B1011000; //Up-Left-Right
+  JoystickValues[28] = B0111000; //Down-Left-Right
+  JoystickValues[30] = B1111000; //Up-Down-Left-Right
   
   delay(1500);// Wait for the Saturn to start up.
 }
