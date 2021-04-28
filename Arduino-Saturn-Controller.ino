@@ -27,7 +27,7 @@ volatile uint8_t ZYXRValues[157];
 void setup() 
 {
   //Setup controller pins Up, Down, Left, Right, A, B, C
-  //         CBARLDU-;
+  //         BCARLDU-;
   DDRB  &= ~B11111110; //Set them up as inputs
   PORTB |=  B11111110; //Enable internal pull-ups
   

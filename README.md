@@ -13,8 +13,8 @@ This is still an untested work in progress. Don't use this as a reference.
 | Left       | PB3  |
 | Right      | PB4  |
 | A          | PB5  |
-| B          | PB6  |
-| C          | PB7  |
+| B          | PB7  |
+| C          | PB6  |
 | Z          | PD2  |
 | Y          | PD3  |
 | X          | PD4  |
@@ -30,8 +30,8 @@ This is still an untested work in progress. Don't use this as a reference.
 | PB3 | Arduino 14       | **Controller Left**  |
 | PB4 | Arduino 8        | **Controller Right** |
 | PB5 | Arduino 9        | **Controller A**     |
-| PB6 | Arduino 10       | **Controller B**     |
-| PB7 | Pin 12 D11       | **Controller C**     |
+| PB6 | Arduino 10       | **Controller C**     |
+| PB7 | Pin 12 D11       | **Controller B**     |
 
 |PORTC| Arduino          | Usage                |
 |-----|------------------|----------------------|
