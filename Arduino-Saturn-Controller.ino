@@ -22,6 +22,7 @@
  */
 
 uint8_t JoystickValues[31];
+uint8_t ZYXRValues[157];
 
 void setup() 
 {
@@ -66,23 +67,45 @@ void setup()
   // Enable both interrupts
   EIMSK |= bit(INT0)  | bit(INT1);
 
-  //                    UDLR---
-  JoystickValues[0]  = B0000000; //Nothing
-  JoystickValues[2]  = B1000000; //Up
-  JoystickValues[4]  = B0100000; //Down
-  JoystickValues[6]  = B0010000; //Up-Down
-  JoystickValues[8]  = B0001000; //Left
-  JoystickValues[10] = B1010000; //Up-Left
-  JoystickValues[12] = B0110000; //Down-Left
-  JoystickValues[14] = B1110000; //Up-Down-Left
-  JoystickValues[16] = B0001000; //Right
-  JoystickValues[18] = B1001000; //Up-Right
-  JoystickValues[20] = B0101000; //Down-Right
-  JoystickValues[22] = B1101000; //Up-Down-Right
-  JoystickValues[24] = B0011000; //Left-Right
-  JoystickValues[26] = B1011000; //Up-Left-Right
-  JoystickValues[28] = B0111000; //Down-Left-Right
-  JoystickValues[30] = B1111000; //Up-Down-Left-Right
+  //Define the PORTF outputs for all possible joystick values, always set TL high.
+  //(PORTB & B00011110) gives the array value 0-30
+  //                    UDLR--T-
+  JoystickValues[0]  = B00000010; //Nothing
+  JoystickValues[2]  = B10000010; //Up
+  JoystickValues[4]  = B01000010; //Down
+  JoystickValues[6]  = B00100010; //Up-Down
+  JoystickValues[8]  = B00010010; //Left
+  JoystickValues[10] = B10100010; //Up-Left
+  JoystickValues[12] = B01100010; //Down-Left
+  JoystickValues[14] = B11100010; //Up-Down-Left
+  JoystickValues[16] = B00010010; //Right
+  JoystickValues[18] = B10010010; //Up-Right
+  JoystickValues[20] = B01010010; //Down-Right
+  JoystickValues[22] = B11010010; //Up-Down-Right
+  JoystickValues[24] = B00110010; //Left-Right
+  JoystickValues[26] = B10110010; //Up-Left-Right
+  JoystickValues[28] = B01110010; //Down-Left-Right
+  JoystickValues[30] = B11110010; //Up-Down-Left-Right
+
+  //Define the PORTF outputs for all possible Z Y X R values, always set TL high.
+  //(PIND & B10011100) gives the array value 0-156
+  //                    ZYXR--T-
+  ZYXRValues[0]      = B00000010; //Nothing
+  ZYXRValues[4]      = B10000010; //Z---
+  ZYXRValues[8]      = B01000010; //-Y--
+  ZYXRValues[12]     = B11000010; //ZY--
+  ZYXRValues[16]     = B00100010; //--X-
+  ZYXRValues[20]     = B10100010; //Z-X--
+  ZYXRValues[24]     = B01100010; //-YX-
+  ZYXRValues[28]     = B11100010; //ZYX-
+  ZYXRValues[128]    = B00010010; //---R
+  ZYXRValues[132]    = B10010010; //Z--R
+  ZYXRValues[136]    = B01010010; //-Y-R
+  ZYXRValues[140]    = B11010010; //ZY-R
+  ZYXRValues[144]    = B00110010; //--XR
+  ZYXRValues[148]    = B10110010; //Z-XR
+  ZYXRValues[152]    = B01110010; //-YXR
+  ZYXRValues[156]    = B11110010; //ZYXR
   
   delay(1500);// Wait for the Saturn to start up.
 }
