@@ -23,6 +23,7 @@
 
 uint8_t JoystickValues[31];
 uint8_t ZYXRValues[157];
+uint8_t CBAStValues[241];
 
 void setup() 
 {
@@ -106,6 +107,20 @@ void setup()
   ZYXRValues[148]    = B10110010; //Z-XR
   ZYXRValues[152]    = B01110010; //-YXR
   ZYXRValues[156]    = B11110010; //ZYXR
+
+  //Define the PORTF outputs for C B A St values, always set TL high
+  //(PINE & B01000000) Isolates Start
+  //(PINB & B11100000) Isolates A B C
+  //((PINE & B01000000) >> 2) Shifts Start bit over 2
+  //((PINB & B11100000) | ((PINE & B01000000) >> 2))    CBAS---- bits in one byte.
+  //(((PINB & B11100000) | ((PINE & B01000000) >> 2)) & B11110000) Gives tells us which bits are set.
+  
+  //FINAL: Gives us all the bits we want to send to PORTF for C B A S with TL. Just flip them.
+  //((((PINB & B11100000) | ((PINE & B01000000) >> 2)) & B11110000)) | B00000010
+
+  //Define PORTF outputs for L with TL high. It just shifts the PINC L bit into the right place and adds TL
+  //(((PINC & B01000000) >> 2) | B00000010)
+  
   
   delay(1500);// Wait for the Saturn to start up.
 }
