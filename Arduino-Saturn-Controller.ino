@@ -68,10 +68,10 @@ void setup()
   EIMSK |= bit(INT0)  | bit(INT1);
 
   //Default outputs
-  OUTPUTS[0] = B11110010;
-  OUTPUTS[1] = B11110010;
-  OUTPUTS[2] = B11110010;
-  OUTPUTS[3] = B00110010;
+  OUTPUTS[0] = B11110010; //ZYXR
+  OUTPUTS[1] = B11110010; //BCAS
+  OUTPUTS[2] = B11110010; //UDLR
+  OUTPUTS[3] = B00110010; //L
   
   //delay(1500);// Wait for the Saturn to start up.
 }
@@ -106,5 +106,5 @@ void loop()
   //PINC = -L------
   //For this one in particular we need to set 001L according to the documentation here (page 97):
   //https://cdn.preterhuman.net/texts/gaming_and_diversion/CONSOLES/sega/ST-169-R1-072694.pdf
-  OUTPUTS[3] = (((PINC & B01000000) >> 2) | B11000000) | B00000010;
+  OUTPUTS[3] = (((PINC & B01000000) >> 2) | B00100010);
 }
