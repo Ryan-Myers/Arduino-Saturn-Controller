@@ -21,6 +21,9 @@
  *  
  */
 
+volatile uint8_t SELECTSTATE;
+volatile uint8_t OUTPUTS[4];
+
 void setup() 
 {
   //Setup controller pins Up, Down, Left, Right, A, B, C
@@ -43,7 +46,7 @@ void setup()
   DDRE  &= ~B01000000; //Set it up as input
   PORTE |=  B01000000; //Enable internal pull-ups
   
-  //Setup Saturn select pins S0 and S1
+  //Setup Saturn select pins S0 (TH) and S1 (TR)
   //         ------10
   DDRD  &= ~B00000011; //Set them up as inputs
   PORTD |=  B00000011; //Enable internal pull-ups
@@ -53,73 +56,55 @@ void setup()
   DDRF  |=  B11110010; //Set them up as outputs
   PORTF |=  B11110010; //Set them HIGH by default
 
-  // Interrupt 0 for clock (PD0, pin 3)
+  // Interrupt 0 for clock (PD0, pin 3) (TH S0 on Saturn)
   EICRA &= ~(bit(ISC00) | bit (ISC01)); // Clear existing flags of interrupt 0 
   EICRA |= bit (ISC00);                 // Set interrupt on rising and falling
   
-  // Interrupt 1 for clock (PD1, pin 2)
+  // Interrupt 1 for clock (PD1, pin 2) (TR S1 on Saturn)
   EICRA &= ~(bit(ISC10) | bit (ISC11)); // Clear existing flags of interrupt 1 
   EICRA |= bit (ISC10);                 // Set interrupt on rising and falling
   
   // Enable both interrupts
   EIMSK |= bit(INT0)  | bit(INT1);
+
+  //Default outputs
+  OUTPUTS[0] = B11110010;
+  OUTPUTS[1] = B11110010;
+  OUTPUTS[2] = B11110010;
+  OUTPUTS[3] = B00110010;
   
-  delay(1500);// Wait for the Saturn to start up.
+  //delay(1500);// Wait for the Saturn to start up.
 }
 
-//Interrupt when Saturn S0 pin changes
+//Interrupt when Saturn S0 (TH) pin changes
 ISR (INT0_vect)
 {
-  CheckAndSetValues();
+  //0, 1, 2, 3
+  PORTF = OUTPUTS[PIND & B00000011];
 }
 
-//Interrupt when Saturn S1 pin changes
+//Interrupt when Saturn S1 (TR) pin changes
 ISR (INT1_vect)
 {
-  CheckAndSetValues();
+  //0, 1, 2, 3
+  PORTF = OUTPUTS[PIND & B00000011];
 }
 
 void loop()
 {
-  //CheckAndSetValues();
-}
-
-void CheckAndSetValues()
-{
-  uint8_t control_bits = B00000000;
-  
-  switch (PIND & B00000011)
-  {
-    case B00000000:
-      //0:0    ZYXR--T-
-      //PIND = Z--YXR--
-      control_bits = (PIND & B10000010) | ((PIND & B00011100) << 2);
-      break;
-    case B00000011:
-      //1:1    001L--T-
-      //PINC = -L------
-      //For this one in particular we need to set 001L according to the documentation here (page 97):
-      //https://cdn.preterhuman.net/texts/gaming_and_diversion/CONSOLES/sega/ST-169-R1-072694.pdf
-      control_bits = ((PINC & B01000000) >> 2) | B11000000;
-      break;
-    case B00000010:
-      //1:0    BCAS--T-
-      //PINB = BCA-----
-      //PINE = -S------
-      control_bits = (PINB & B11100000) | ((PINE & B01000000) >> 2);
-      break;
-    case B00000001:
-      //0:1    UDLR--T-
-      //PINB = ---UDLR-
-      control_bits = (PINB & B00011110) << 3;
-      break;
-  }
-
-  //Setting bits LOW is what triggers a button press for the Sega Saturn
-  //control_bits = ~control_bits;
-  //Always set T (TL ACK) High
-  control_bits |= B00000010;
-  
-  //PORTF = 0123--T-
-  PORTF = control_bits;
+  //0:0    ZYXR--T-
+  //PIND = Z--YXR--
+  OUTPUTS[0] = ((PIND & B10000010) | ((PIND & B00011100) << 2)) | B00000010;
+  //1:0    BCAS--T-
+  //PINB = BCA-----
+  //PINE = -S------
+  OUTPUTS[1] = ((PINB & B00011110) << 3) | B00000010;
+  //0:1    UDLR--T-
+  //PINB = ---UDLR-
+  OUTPUTS[2] = ((PINB & B11100000) | ((PINE & B01000000) >> 2)) | B00000010;
+  //1:1    001L--T-
+  //PINC = -L------
+  //For this one in particular we need to set 001L according to the documentation here (page 97):
+  //https://cdn.preterhuman.net/texts/gaming_and_diversion/CONSOLES/sega/ST-169-R1-072694.pdf
+  OUTPUTS[3] = (((PINC & B01000000) >> 2) | B11000000) | B00000010;
 }
