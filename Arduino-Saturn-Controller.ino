@@ -87,7 +87,7 @@ void loop()
 void CheckAndSetValues()
 {
   uint8_t control_bits = B00000000;
-  //PORTF = 0123--T-
+  
   switch (PIND & B00000011)
   {
     case B00000000:
@@ -96,9 +96,11 @@ void CheckAndSetValues()
       control_bits = (PIND & B10000010) | ((PIND & B00011100) << 2);
       break;
     case B00000011:
-      //1:1    ---L--T-
+      //1:1    001L--T-
       //PINC = -L------
-      control_bits = (PINC & B01000000) >> 2;
+      //For this one in particular we need to set 001L according to the documentation here (page 97):
+      //https://cdn.preterhuman.net/texts/gaming_and_diversion/CONSOLES/sega/ST-169-R1-072694.pdf
+      control_bits = ((PINC & B01000000) >> 2) | B11000000;
       break;
     case B00000010:
       //1:0    BCAS--T-
@@ -114,9 +116,10 @@ void CheckAndSetValues()
   }
 
   //Setting bits LOW is what triggers a button press for the Sega Saturn
-  control_bits = ~control_bits;
+  //control_bits = ~control_bits;
   //Always set T (TL ACK) High
   control_bits |= B00000010;
   
+  //PORTF = 0123--T-
   PORTF = control_bits;
 }
