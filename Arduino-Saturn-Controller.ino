@@ -21,7 +21,6 @@
  *  
  */
 
-volatile uint8_t SELECTSTATE;
 volatile uint8_t OUTPUTS[4];
 
 void setup() 
@@ -69,8 +68,8 @@ void setup()
 
   //Default outputs
   OUTPUTS[0] = B11110010; //ZYXR
-  OUTPUTS[1] = B11110010; //BCAS
-  OUTPUTS[2] = B11110010; //UDLR
+  OUTPUTS[1] = B11110010; //UDLR
+  OUTPUTS[2] = B11110010; //BCAS
   OUTPUTS[3] = B00110010; //L
   
   //delay(1500);// Wait for the Saturn to start up.
@@ -95,13 +94,16 @@ void loop()
   //0:0    ZYXR--T-
   //PIND = Z--YXR--
   OUTPUTS[0] = ((PIND & B10000010) | ((PIND & B00011100) << 2)) | B00000010;
+  
+  //0:1    UDLR--T-
+  //PINB = ---UDLR-
+  OUTPUTS[1] = ((PINB & B00011110) << 3) | B00000010;
+  
   //1:0    BCAS--T-
   //PINB = BCA-----
   //PINE = -S------
-  OUTPUTS[1] = ((PINB & B00011110) << 3) | B00000010;
-  //0:1    UDLR--T-
-  //PINB = ---UDLR-
   OUTPUTS[2] = ((PINB & B11100000) | ((PINE & B01000000) >> 2)) | B00000010;
+  
   //1:1    001L--T-
   //PINC = -L------
   //For this one in particular we need to set 001L according to the documentation here (page 97):
