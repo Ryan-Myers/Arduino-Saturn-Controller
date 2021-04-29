@@ -21,13 +21,10 @@
  *  
  */
 
-volatile uint8_t JoystickValues[31];
-volatile uint8_t ZYXRValues[157];
-
 void setup() 
 {
   //Setup controller pins Up, Down, Left, Right, A, B, C
-  //         BCARLDU-;
+  //         BCAUDLR-;
   DDRB  &= ~B11111110; //Set them up as inputs
   PORTB |=  B11111110; //Enable internal pull-ups
   
@@ -37,7 +34,7 @@ void setup()
   PORTC |=  B01000000; //Enable internal pull-ups
   
   //Setup controller pins Z Y X and R as inputs
-  //         R--XYZ--
+  //         Z--YXR--
   DDRD  &= ~B10011100; //Set them up as inputs
   PORTD |=  B10011100; //Enable internal pull-ups
   
@@ -54,7 +51,7 @@ void setup()
   //Setup Saturn data pins D0, D1, D2, D3, and TL ACK
   //         0123--T-
   DDRF  |=  B11110010; //Set them up as outputs
-  PORTF &= ~B11110010; //Set them LOW by default
+  PORTF |=  B11110010; //Set them HIGH by default
 
   // Interrupt 0 for clock (PD0, pin 3)
   EICRA &= ~(bit(ISC00) | bit (ISC01)); // Clear existing flags of interrupt 0 
@@ -66,60 +63,6 @@ void setup()
   
   // Enable both interrupts
   EIMSK |= bit(INT0)  | bit(INT1);
-
-  //Define the PORTF outputs for all possible joystick values, always set TL high.
-  //(PINB & B00011110) gives the array value 0-30
-  //                    UDLR--T-
-  JoystickValues[0]  = B00000010; //Nothing
-  JoystickValues[2]  = B10000010; //Up
-  JoystickValues[4]  = B01000010; //Down
-  JoystickValues[6]  = B00100010; //Up-Down
-  JoystickValues[8]  = B00010010; //Left
-  JoystickValues[10] = B10100010; //Up-Left
-  JoystickValues[12] = B01100010; //Down-Left
-  JoystickValues[14] = B11100010; //Up-Down-Left
-  JoystickValues[16] = B00010010; //Right
-  JoystickValues[18] = B10010010; //Up-Right
-  JoystickValues[20] = B01010010; //Down-Right
-  JoystickValues[22] = B11010010; //Up-Down-Right
-  JoystickValues[24] = B00110010; //Left-Right
-  JoystickValues[26] = B10110010; //Up-Left-Right
-  JoystickValues[28] = B01110010; //Down-Left-Right
-  JoystickValues[30] = B11110010; //Up-Down-Left-Right
-
-  //Define the PORTF outputs for all possible Z Y X R values, always set TL high.
-  //(PIND & B10011100) gives the array value 0-156
-  //                    ZYXR--T-
-  ZYXRValues[0]      = B00000010; //Nothing
-  ZYXRValues[4]      = B10000010; //Z---
-  ZYXRValues[8]      = B01000010; //-Y--
-  ZYXRValues[12]     = B11000010; //ZY--
-  ZYXRValues[16]     = B00100010; //--X-
-  ZYXRValues[20]     = B10100010; //Z-X--
-  ZYXRValues[24]     = B01100010; //-YX-
-  ZYXRValues[28]     = B11100010; //ZYX-
-  ZYXRValues[128]    = B00010010; //---R
-  ZYXRValues[132]    = B10010010; //Z--R
-  ZYXRValues[136]    = B01010010; //-Y-R
-  ZYXRValues[140]    = B11010010; //ZY-R
-  ZYXRValues[144]    = B00110010; //--XR
-  ZYXRValues[148]    = B10110010; //Z-XR
-  ZYXRValues[152]    = B01110010; //-YXR
-  ZYXRValues[156]    = B11110010; //ZYXR
-
-  //Define the PORTF outputs for C B A St values, always set TL high
-  //(PINE & B01000000) Isolates Start
-  //(PINB & B11100000) Isolates A B C
-  //((PINE & B01000000) >> 2) Shifts Start bit over 2
-  //((PINB & B11100000) | ((PINE & B01000000) >> 2))    CBAS---- bits in one byte.
-  //(((PINB & B11100000) | ((PINE & B01000000) >> 2)) & B11110000) Gives tells us which bits are set.
-  
-  //FINAL: Gives us all the bits we want to send to PORTF for C B A S with TL. Just flip them.
-  //((((PINB & B11100000) | ((PINE & B01000000) >> 2)) & B11110000)) | B00000010
-
-  //Define PORTF outputs for L with TL high. It just shifts the PINC L bit into the right place and adds TL
-  //(((PINC & B01000000) >> 2) | B00000010)
-  
   
   delay(1500);// Wait for the Saturn to start up.
 }
@@ -142,25 +85,38 @@ void loop()
 }
 
 void CheckAndSetValues()
-{  
-  //Setting bits LOW is what triggers a button press for the Sega Saturn
+{
+  uint8_t control_bits = B00000000;
+  //PORTF = 0123--T-
   switch (PIND & B00000011)
   {
     case B00000000:
-      //0:0 Z Y X R
-      PORTF = (ZYXRValues[(PIND & B10011100)]);
+      //0:0    ZYXR--T-
+      //PIND = Z--YXR--
+      control_bits = (PIND & B10000010) | ((PIND & B00011100) << 2);
       break;
     case B00000011:
-      //1:1 - - - L
-      PORTF = (((PINC & B01000000) >> 2) | B00000010);
+      //1:1    ---L--T-
+      //PINC = -L------
+      control_bits = (PINC & B01000000) >> 2;
       break;
     case B00000010:
-      //1:0 B C A Start
-      PORTF = (((((PINB & B11100000) | ((PINE & B01000000) >> 2)) & B11110000)) | B00000010);
+      //1:0    BCAS--T-
+      //PINB = BCA-----
+      //PINE = -S------
+      control_bits = (PINB & B11100000) | ((PINE & B01000000) >> 2);
       break;
     case B00000001:
-      //0:1 Up Down Left Right
-      PORTF = (JoystickValues[(PINB & B00011110)]);
+      //0:1    UDLR--T-
+      //PINB = ---UDLR-
+      control_bits = (PINB & B00011110) << 3;
       break;
   }
+
+  //Setting bits LOW is what triggers a button press for the Sega Saturn
+  control_bits = ~control_bits;
+  //Always set T (TL ACK) High
+  control_bits |= B00000010;
+  
+  PORTF = control_bits;
 }

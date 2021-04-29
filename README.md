@@ -25,10 +25,10 @@ This is still an untested work in progress. Don't use this as a reference.
 |PORTB| Arduino          | Usage                |
 |-----|------------------|----------------------|
 | PB0 | Pin 8  D17       | (Not Used)           |
-| PB1 | Arduino 15       | **Controller Up**    |
-| PB2 | Arduino 16       | **Controller Down**  |
-| PB3 | Arduino 14       | **Controller Left**  |
-| PB4 | Arduino 8        | **Controller Right** |
+| PB1 | Arduino 15       | **Controller Right**    |
+| PB2 | Arduino 16       | **Controller Left**  |
+| PB3 | Arduino 14       | **Controller Down**  |
+| PB4 | Arduino 8        | **Controller Up** |
 | PB5 | Arduino 9        | **Controller A**     |
 | PB6 | Arduino 10       | **Controller C**     |
 | PB7 | Pin 12 D11       | **Controller B**     |
@@ -48,12 +48,12 @@ This is still an untested work in progress. Don't use this as a reference.
 |-----|------------------|----------------------|
 | PD0 | Arduino 3 (INT0) | **Saturn SEL0**      |
 | PD1 | Arduino 2 (INT1) | **Saturn SEL1**      |
-| PD2 | Arduino RXI      | **Controller Z**     |
-| PD3 | Arduino TXO      | **Controller Y**     |
-| PD4 | Arduino 4        | **Controller X**      |
+| PD2 | Arduino RXI      | **Controller R**     |
+| PD3 | Arduino TXO      | **Controller X**     |
+| PD4 | Arduino 4        | **Controller Y**      |
 | PD5 | TXLED            | (Unusable)           |
 | PD6 | Pin 26 on Chip   | (Not Used)           |
-| PD7 | Arduino 6        | **Controller R**     |
+| PD7 | Arduino 6        | **Controller Z**     |
  
 |PORTE| Arduino          | Usage                |
 |-----|------------------|----------------------|
