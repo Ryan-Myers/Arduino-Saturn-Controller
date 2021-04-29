@@ -8,17 +8,17 @@ This is still an untested work in progress. Don't use this as a reference.
 
 | Controller | PORT |
 |------------|------|
-| Up         | PB1  |
-| Down       | PB2  |
-| Left       | PB3  |
-| Right      | PB4  |
+| Up         | PB4  |
+| Down       | PB3  |
+| Left       | PB2  |
+| Right      | PB1  |
 | A          | PB5  |
 | B          | PB7  |
 | C          | PB6  |
-| Z          | PD2  |
-| Y          | PD3  |
-| X          | PD4  |
-| R          | PD7  |
+| Z          | PD7  |
+| Y          | PD4  |
+| X          | PD3  |
+| R          | PD2  |
 | L          | PC6  |
 | START      | PE6  |
 
