@@ -1,11 +1,12 @@
-ZERO 	= 1		;Should always be maintained as ZERO. Used in MUL
+SCRH	= 0		;Scratch register used during multiplies. Does not need to be restored after usage.
+ZERO	= 1		;Should always be maintained as ZERO. Used in MUL
 SRT		= 2		;For storing the SREG temporarily while in interrupts
-MTR 	= 16	;Main Temp Register
-VTR 	= 17	;Interrupt (Vector) Temp Register
-OUTPUT0 = 18	;This is the output to PORTF for ZYXR--T-
-OUTPUT1 = 19	;This is the output to PORTF for UDLR--T-
-OUTPUT2 = 20	;This is the output to PORTF for BCAS--T-
-OUTPUT3 = 21	;This is the output to PORTF for 001L--T-
+MTR		= 16	;Main Temp Register
+VTR		= 17	;Interrupt (Vector) Temp Register
+OUTPUT0	= 18	;This is the output to PORTF for ZYXR--T-
+OUTPUT1	= 19	;This is the output to PORTF for UDLR--T-
+OUTPUT2	= 20	;This is the output to PORTF for BCAS--T-
+OUTPUT3	= 21	;This is the output to PORTF for 001L--T-
 PAIRL 	= 22	;For a paired MUL register Low byte
 PAIRH 	= 23	;For a paired MUL register High byte
 TEMP 	= 25	;For temporary use
@@ -130,7 +131,7 @@ rjmp	endvector			;2 clocks
 case3:
 out		PORTF,	OUTPUT3		;1 clock
 endvector:
-out	SREG,	SRT				;1 clock RESTORE SREG
+out		SREG,	SRT			;1 clock RESTORE SREG
 reti						;5 clocks
 
 main:
@@ -183,8 +184,8 @@ in		PAIRL,	PIND
 andi	MTR, 	0B10000010
 ori		MTR, 	0B00000010
 ldi		TEMP,	0B00000100
-mul		PAIRL,	TEMP
-movw	PAIRL,	r0			;moves r0:ZERO to PAIRL:PAIRH
+mul		PAIRL,	TEMP		;Uses temporary registers SCRH and ZERO for the multiply
+movw	PAIRL,	SCRH		;moves SCRH:ZERO to PAIRL:PAIRH
 eor		ZERO,	ZERO		;RESETS ZERO REGISTER
 andi	PAIRL,	0B01110000
 mov		OUTPUT0,MTR			;Copy MTR into OUTPUT0
