@@ -94,7 +94,7 @@ eor		ZERO,	ZERO		;Always define the ZERO register and set it to zero on load
 out		SREG,	ZERO		;Default the Status Register to ZERO as well
 ldi		YL, 	0B11111111 	;Not sure why we care about YL yet.
 ldi		YH, 	DDRD		;Not sure why YH is DDRD yet either.
-out		SPH, 	YH			;Set stack pointer to YH
+out		SPH, 	YH			;Set stack pointer high to YH
 out		SPL, 	YL			;Set stack pointer low to YL
 call	main
 jmp		exit
@@ -177,7 +177,7 @@ ldi		OUTPUT2,0B11110010	;BCAS--T-
 ldi		OUTPUT3,0B00110010	;001L--T- First 3 bits are hardcoded
 
 setupoutputs:
-cbi		PORTB,	0B00000101	;Turn on TXLED
+cbi		PORTD,	0B00000101	;Turn on TXLED
 ;OUTPUT0 = ((PIND & B10000010) | ((PIND & B00011100) << 2)) | B00000010;
 in		MTR, 	PIND
 in		PAIRL,	PIND
