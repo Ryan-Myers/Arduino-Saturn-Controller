@@ -136,37 +136,51 @@ reti						;5 clocks
 
 main:
 sei							;Enable interrupts
+;DDRB  &= ~B11111110; //Set them up as inputs
 in		MTR,	DDRB
 andi	MTR, 	0B00000001
 out		DDRB,	MTR			;BCAUDLR- as inputs
+;PORTB |=  B11111110; //Enable internal pull-ups
 in		MTR,	PORTB
 ori		MTR, 	0B11111110
 out		PORTB,	MTR			;Enable internal pullups on above
+;DDRC  &= ~B01000000; //Set it up as input
 cbi		DDRC,	0B00000110
+;PORTC |=  B01000000; //Enable internal pull-ups
 sbi		PORTC,	0B00000110
+;DDRD  &= ~B10011100; //Set them up as inputs
 in		MTR,	DDRD
 andi	MTR,	0B01100011
 out		DDRD,	MTR
-in		MTR,	PORTD 		;??? Is PORTD right?
+;PORTD |=  B10011100; //Enable internal pull-ups
+in		MTR,	PORTD 		
 ori		MTR,	0B10011100
 out		PORTD,	MTR
+;DDRE  &= ~B01000000; //Set it up as input
 cbi		DDRE,	0B00000110
+;PORTE |=  B01000000; //Enable internal pull-ups
 sbi		PORTE, 	0B00000110
+;DDRD  &= ~B00000011; //Set them up as inputs
 in		MTR,	DDRD
 andi	MTR,	0B11111100
 out		DDRD, 	MTR
+;PORTD |=  B00000011; //Enable internal pull-ups
 in		MTR,	PORTD
 ori		MTR,	0B00000011
 out		PORTD,	MTR
+;DDRF  |=  B11110010; //Set them up as outputs
 in		MTR,	DDRF
 ori		MTR,	0B11110010
 out		DDRF,	MTR
+;PORTF |=  B11110010; //Set them HIGH by default
 in		MTR, 	PORTF
 ori		MTR,	0B11110010
 out		PORTF, 	MTR
+;EICRA &= ~(bit(ISC00) | bit (ISC01)); // Clear existing flags of interrupt 0 
 lds		MTR,	EICRA		;Begin clearing flags on interrupt0
 andi	MTR,	0B11111100
 sts		EICRA,	MTR			;Clear existing flags on interrupt0
+;EICRA |= bit (ISC00);                 // Set interrupt on rising and falling
 lds		MTR,	EICRA		;Begin interrupt on rising and falling
 ori		MTR,	0B00000001
 sts		EICRA, 	MTR			;Set interrupt on rising and falling
