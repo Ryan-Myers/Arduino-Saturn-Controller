@@ -21,7 +21,11 @@
  *  
  */
 
-volatile uint8_t OUTPUTS[4];
+//volatile uint8_t OUTPUTS[4];
+volatile uint8_t OUTPUT0;
+volatile uint8_t OUTPUT1;
+volatile uint8_t OUTPUT2;
+volatile uint8_t OUTPUT3;
 
 void setup() 
 {
@@ -67,10 +71,10 @@ void setup()
   EIMSK |= bit(INT0)  | bit(INT1);
 
   //Default outputs
-  OUTPUTS[0] = B11110010; //ZYXR
-  OUTPUTS[1] = B11110010; //UDLR
-  OUTPUTS[2] = B11110010; //BCAS
-  OUTPUTS[3] = B00110010; //L
+  OUTPUT0 = B11110010; //ZYXR
+  OUTPUT1 = B11110010; //UDLR
+  OUTPUT2 = B11110010; //BCAS
+  OUTPUT3 = B00110010; //L
   
   //delay(1500);// Wait for the Saturn to start up.
 }
@@ -79,34 +83,35 @@ void setup()
 ISR (INT0_vect)
 {
   //0, 1, 2, 3
-  PORTF = OUTPUTS[PIND & B00000011];
-}
-
-//Interrupt when Saturn S1 (TR) pin changes
-ISR (INT1_vect)
-{
-  //0, 1, 2, 3
-  PORTF = OUTPUTS[PIND & B00000011];
+  PORTF = OUTPUT0;
 }
 
 void loop()
 {
   //0:0    ZYXR--T-
   //PIND = Z--YXR--
-  OUTPUTS[0] = ((PIND & B10000010) | ((PIND & B00011100) << 2)) | B00000010;
+  OUTPUT0 = ((PIND & B10000010) | ((PIND & B00011100) << 2)) | B00000010;
   
   //0:1    UDLR--T-
   //PINB = ---UDLR-
-  OUTPUTS[1] = ((PINB & B00011110) << 3) | B00000010;
+  OUTPUT1 = ((PINB & B00011110) << 3) | B00000010;
   
   //1:0    BCAS--T-
   //PINB = BCA-----
   //PINE = -S------
-  OUTPUTS[2] = ((PINB & B11100000) | ((PINE & B01000000) >> 2)) | B00000010;
+  OUTPUT2 = ((PINB & B11100000) | ((PINE & B01000000) >> 2)) | B00000010;
   
   //1:1    001L--T-
   //PINC = -L------
   //For this one in particular we need to set 001L according to the documentation here (page 97):
   //https://cdn.preterhuman.net/texts/gaming_and_diversion/CONSOLES/sega/ST-169-R1-072694.pdf
-  OUTPUTS[3] = (((PINC & B01000000) >> 2) | B00100010);
+  OUTPUT3 = (((PINC & B01000000) >> 2) | B00100010);
+
+  TXLED0; //Turn off TXLED;
+  delay(100);
+  TXLED1; //Turn on TXLED;
+  delay(100);
+  TXLED0;
+  delay(100);
+  TXLED1;
 }

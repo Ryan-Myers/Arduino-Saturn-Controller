@@ -37,6 +37,7 @@ ZH 		= 31	;Z High byte
 .equiv SREG, 	0x3F	;STATUS REGISTER - This gets modified with almost every instruction
 .equiv SPH, 	0x3E	;STACK POINTER HIGH
 .equiv SPL, 	0x3D	;STACK POINTER LOW
+.equiv PD5,		5
 ;equiv OUTPUT0 0x0126	;0x800126
 ;equiv OUTPUT1 0x0127	;0x800127
 ;equiv OUTPUT2 0x0128	;0x800128
@@ -191,7 +192,7 @@ ldi		OUTPUT2,0B11110010	;BCAS--T-
 ldi		OUTPUT3,0B00110010	;001L--T- First 3 bits are hardcoded
 
 setupoutputs:
-cbi		PORTD,	0B00000101	;Turn on TXLED
+cbi		PORTD,	PD5			;Turn on TXLED (PD5)
 ;OUTPUT0 = ((PIND & B10000010) | ((PIND & B00011100) << 2)) | B00000010;
 in		MTR, 	PIND
 in		PAIRL,	PIND
@@ -203,7 +204,7 @@ movw	PAIRL,	SCRH		;moves SCRH:ZERO to PAIRL:PAIRH
 eor		ZERO,	ZERO		;RESETS ZERO REGISTER
 andi	PAIRL,	0B01110000
 mov		OUTPUT0,MTR			;Copy MTR into OUTPUT0
-sbi 	PORTD, 	0B00000101	;Turn off TXLED
+sbi 	PORTD, 	PD5			;Turn off TXLED (PD5)
 rjmp	setupoutputs
 
 exit:
