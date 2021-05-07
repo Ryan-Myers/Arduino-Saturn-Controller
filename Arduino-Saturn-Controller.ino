@@ -21,7 +21,7 @@
  *  
  */
 
-//volatile uint8_t OUTPUTS[4];
+volatile uint8_t OUTPUTS[4];
 volatile uint8_t OUTPUT0;
 volatile uint8_t OUTPUT1;
 volatile uint8_t OUTPUT2;
@@ -64,54 +64,160 @@ void setup()
   EICRA |= bit (ISC00);                 // Set interrupt on rising and falling
   
   // Interrupt 1 for clock (PD1, pin 2) (TR S1 on Saturn)
-  EICRA &= ~(bit(ISC10) | bit (ISC11)); // Clear existing flags of interrupt 1 
-  EICRA |= bit (ISC10);                 // Set interrupt on rising and falling
+  //EICRA &= ~(bit(ISC10) | bit (ISC11)); // Clear existing flags of interrupt 1 
+  //EICRA |= bit (ISC10);                 // Set interrupt on rising and falling
   
   // Enable both interrupts
-  EIMSK |= bit(INT0)  | bit(INT1);
+  //EIMSK |= bit(INT0);//  | bit(INT1);
 
   //Default outputs
+  /*
   OUTPUT0 = B11110010; //ZYXR
   OUTPUT1 = B11110010; //UDLR
   OUTPUT2 = B11110010; //BCAS
   OUTPUT3 = B00110010; //L
-  
+  */
+  //OUTPUTS[0] = B11110010; //ZYXR
+  //OUTPUTS[1] = B11110010; //UDLR
+  //OUTPUTS[2] = B11110010; //BCAS
+  //OUTPUTS[3] = B00110010; //L
+  asm volatile(
+    "ldi   r18,0B11110010 \n"
+    "ldi   r19,0B01110010 \n"
+    "ldi   r20,0B11110010 \n"
+    "ldi   r21,0B00110010 \n"
+    :
+    :
+    :"r18","r19", "r20", "r21"
+  );
   //delay(1500);// Wait for the Saturn to start up.
 }
 
+/*
 //Interrupt when Saturn S0 (TH) pin changes
-ISR (INT0_vect)
+ISR (INT0_vect, ISR_NAKED)
 {
-  //0, 1, 2, 3
-  PORTF = OUTPUT0;
-}
+  /*
+  asm volatile (
+      "in   r2, __SREG__ \n"   //1 clock SAVE SREG
+      "push r2 \n"
+      "in    r17, %[rPIND] \n"    //1 clock
+      "andi  r17, 0B00000011 \n"  //1 clock
+      "cpi   r17, 0B00000001 \n"  //1 clock
+      "breq  __case1 \n"              //1/2 clocks
+      "brcs  __case0 \n"              //1/2 clocks
+      "cpi   r17, 0B00000010 \n"  //1 clock
+      "breq  __case2 \n"              //1/2 clocks
+      "rjmp  __case3 \n"              //2 clocks
+      "__case0: \n"
+      "out   %[rPORTF],r18 \n" //1 clock
+      "rjmp  __end_vector_1 \n"       //2 clocks
+      "__case1: \n"
+      "out   %[rPORTF],r19 \n" //1 clock
+      "rjmp  __end_vector_1 \n"       //2 clocks
+      "__case2: \n"
+      "out   %[rPORTF],r20 \n" //1 clock
+      "rjmp  __end_vector_1 \n"       //2 clocks
+      "__case3: \n"
+      "out   %[rPORTF],r21 \n"  //1 clock
+      "__end_vector_1: \n"
+      "pop r2 \n"
+      "out   __SREG__, r2 \n"//1 clock RESTORE SREG
+      "pop r2 \n"
+      "reti \n"                       //5 clocks 
+      : //Output operand list
+      : //Input operand list
+        //[OUTPUT0]"r"(OUTPUT0),
+        //[OUTPUT1]"r"(OUTPUT1),
+        //[OUTPUT2]"r"(OUTPUT2),
+        //[OUTPUT3]"r"(OUTPUT3),
+        [rPIND]"I"(_SFR_IO_ADDR(PIND)),
+        [rPORTF]"I"(_SFR_IO_ADDR(PORTF))
+      : //Clobber list
+        //"r16"
+    );*
+    
+    //asm volatile ("in   r3, __SREG__ \n");   //1 clock SAVE SREG
+    //PORTF = OUTPUTS[PIND & B00000011];
+    //asm volatile ("out   __SREG__, r3 \n");//1 clock RESTORE SREG
+    //reti();
+
+
+    asm volatile (
+      "sbis   %[rPIND],   0 \n"
+      "rjmp   __TH0 \n"
+      "sbis   %[rPIND],   1 \n"
+      "out    %[rPORTF],  r19 \n" //OUTPUT 1
+      "rjmp   __TH1 \n"
+      "__TH0: \n"
+      "sbis   %[rPIND],   1 \n"
+      "out    %[rPORTF],  r18 \n" //OUTPUT 0
+      "out    %[rPORTF],  r20 \n" //OUTPUT 2
+      "reti   \n"
+      "__TH1: \n"
+      "sbic   %[rPIND],   1 \n"
+      "reti   \n"
+      "out    %[rPORTF],  r21 \n" //OUTPUT 3
+      "reti   \n"
+      :
+      :
+        [rPIND]"I"(_SFR_IO_ADDR(PIND)),
+        [rPORTF]"I"(_SFR_IO_ADDR(PORTF))
+      :"r18","r19", "r20", "r21"
+    );
+}*/
 
 void loop()
 {
+  TXLED1;
+  asm volatile(
+    "loopstart: \n"
+    "ldi   r18,0B11110010 \n"
+    "ldi   r19,0B01110010 \n"
+    "ldi   r20,0B11110010 \n"
+    "ldi   r21,0B00110010 \n"
+      "sbis   %[rPIND],   0 \n"
+      "rjmp   __TH0 \n"
+      "sbis   %[rPIND],   1 \n"
+      "out    %[rPORTF],  r19 \n" //OUTPUT 1
+      "rjmp   __TH1 \n"
+      "__TH0: \n"
+      "sbis   %[rPIND],   1 \n"
+      "out    %[rPORTF],  r18 \n" //OUTPUT 0
+      "out    %[rPORTF],  r20 \n" //OUTPUT 2
+      "rjmp loopstart   \n"
+      "__TH1: \n"
+      "sbic   %[rPIND],   1 \n"
+      "rjmp loopstart   \n"
+      "out    %[rPORTF],  r21 \n" //OUTPUT 3
+      "rjmp loopstart   \n"
+      :
+      :
+        [rPIND]"I"(_SFR_IO_ADDR(PIND)),
+        [rPORTF]"I"(_SFR_IO_ADDR(PORTF))
+      :"r18","r19", "r20", "r21"
+  );
+  TXLED0;
   //0:0    ZYXR--T-
   //PIND = Z--YXR--
-  OUTPUT0 = ((PIND & B10000010) | ((PIND & B00011100) << 2)) | B00000010;
+  //OUTPUT0 = ((PIND & B10000010) | ((PIND & B00011100) << 2)) | B00000010;
+  //OUTPUTS[0] = B11110010;//((PIND & B10000010) | ((PIND & B00011100) << 2)) | B00000010;
   
   //0:1    UDLR--T-
   //PINB = ---UDLR-
-  OUTPUT1 = ((PINB & B00011110) << 3) | B00000010;
+  //OUTPUT1 = ((PINB & B00011110) << 3) | B00000010;
+  //OUTPUTS[1] = B01110010;//((PINB & B00011110) << 3) | B00000010;
   
   //1:0    BCAS--T-
   //PINB = BCA-----
   //PINE = -S------
-  OUTPUT2 = ((PINB & B11100000) | ((PINE & B01000000) >> 2)) | B00000010;
+  //OUTPUT2 = ((PINB & B11100000) | ((PINE & B01000000) >> 2)) | B00000010;
+  //OUTPUTS[2] = B11110010;//((PINB & B11100000) | ((PINE & B01000000) >> 2)) | B00000010;
   
   //1:1    001L--T-
   //PINC = -L------
   //For this one in particular we need to set 001L according to the documentation here (page 97):
   //https://cdn.preterhuman.net/texts/gaming_and_diversion/CONSOLES/sega/ST-169-R1-072694.pdf
-  OUTPUT3 = (((PINC & B01000000) >> 2) | B00100010);
-
-  TXLED0; //Turn off TXLED;
-  delay(100);
-  TXLED1; //Turn on TXLED;
-  delay(100);
-  TXLED0;
-  delay(100);
-  TXLED1;
+  //OUTPUT3 = (((PINC & B01000000) >> 2) | B00100010);
+  //OUTPUTS[3] = B00110010;//(((PINC & B01000000) >> 2) | B00100010);
 }
