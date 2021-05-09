@@ -44,53 +44,56 @@ ZH 		= 31	;Z High byte
 ;equiv OUTPUT3 0x0129	;0x800129
 
 .section .text
-vectors:
-jmp RESET		;Reset Handler
-jmp EXT_INT0	;IRQ0 External Interrupt Handler
-jmp bad_vector	
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector	
-jmp bad_vector	
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
-jmp bad_vector
+__vectors:
+jmp __ctors_end		;Reset Handler
+jmp __vector_1	  ;IRQ0 External Interrupt Handler
+jmp __bad_interrupt	
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt	
+jmp __bad_interrupt	
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+jmp __bad_interrupt
+
+__ctors_start:
+cpc	r2, r23 ;????
 
 ;Called up at the start of all code, and when reset
-RESET:
+__ctors_end:
 eor		ZERO,	ZERO		;Always define the ZERO register and set it to zero on load
 out		SREG,	ZERO		;Default the Status Register to ZERO as well
 ldi		YL, 	0B11111111 	;Not sure why we care about YL yet.
@@ -98,9 +101,9 @@ ldi		YH, 	DDRD		;Not sure why YH is DDRD yet either.
 out		SPH, 	YH			;Set stack pointer high to YH
 out		SPL, 	YL			;Set stack pointer low to YL
 call	main
-jmp		exit
+jmp		_exit
 
-bad_vector:
+__bad_interrupt:
 jmp		0
 
 ;32 clock budget at best
@@ -110,30 +113,83 @@ jmp		0
 ;15 clocks max for CASE 1
 ;20 clocks max for CASE 2
 ;20 clocks max for CASE 3
-EXT_INT0:
+__vector_1:
 in		SRT,	SREG		;1 clock SAVE SREG
 in		VTR,	PIND		;1 clock
 andi	VTR,	0B00000011	;1 clock
 cpi		VTR,	0B00000001	;1 clock
-breq	case1				;1/2 clocks
-brcs	case0				;1/2 clocks
+breq	__case1				;1/2 clocks
+brcs	__case0				;1/2 clocks
 cpi		VTR,	0B00000010	;1 clock
-breq	case2 	   			;1/2 clocks
-rjmp	case3    			;2 clocks
-case0:				
+breq	__case2 	   			;1/2 clocks
+rjmp	__case3    			;2 clocks
+__case0:				
 out		PORTF,	OUTPUT0		;1 clock
-rjmp	endvector			;2 clocks 
-case1:
+rjmp	__end_vector_1		;2 clocks 
+__case1:
 out		PORTF,	OUTPUT1		;1 clock
-rjmp	endvector			;2 clocks
-case2:
+rjmp	__end_vector_1		;2 clocks
+__case2:
 out		PORTF,	OUTPUT2		;1 clock
-rjmp	endvector			;2 clocks
-case3:
+rjmp	__end_vector_1		;2 clocks
+__case3:
 out		PORTF,	OUTPUT3		;1 clock
-endvector:
+__end_vector_1:
 out		SREG,	SRT			;1 clock RESTORE SREG
-reti						;5 clocks
+reti						    ;5 clocks
+
+;Check if PIND0 (S0, TH) is set to 1
+sbis  PIND, 0 ; PIND0
+rjmp  __TH0 ;It's not set, it's zero 3 cycles
+sbis  PIND, 1 ; PIND1
+out	  PORTF,	OUTPUT1 ;It's not set, it's zero. So TH1:TR0 ;2 cycles
+rjmp  __TH1TR1 ;
+__TH0:
+sbis  PIND, 1; PIND1
+out		PORTF,	OUTPUT0 ;It's not set, it's zero. So TH0:TR0
+sbic  PIND, 1
+out   PORTF,  OUTPUT2 ;It's set so TH0:TR1
+reti                  ;Exit
+__TH1TR1: ;This technically gets called when TH1:TR0 as well
+sbic  PIND, 1 ;Check if TR is 0, and if so end.
+reti
+out   PORTF,  OUTPUT3 ;All else fails, this is TH1:TR1
+reti
+
+;0:0
+;1
+;2
+;1
+;1
+;2
+;5
+;=12
+
+;0:1
+;2
+;1
+;1
+;2
+;1
+;5
+;=12
+
+;1:0
+;1
+;2
+;2
+;1
+;5
+;=11
+
+;1:1
+;2
+;2
+;2
+;2
+;1
+;5
+;=14
 
 main:
 sei							;Enable interrupts
@@ -190,6 +246,7 @@ ldi		OUTPUT0,0B11110010	;ZYXR--T-
 ldi		OUTPUT1,0B01110010	;UDLR--T-
 ldi		OUTPUT2,0B11110010	;BCAS--T-
 ldi		OUTPUT3,0B00110010	;001L--T- First 3 bits are hardcoded
+jmp   setupoutputs;
 
 setupoutputs:
 cbi		PORTD,	PD5			;Turn on TXLED (PD5)
@@ -207,5 +264,5 @@ mov		OUTPUT0,MTR			;Copy MTR into OUTPUT0
 sbi 	PORTD, 	PD5			;Turn off TXLED (PD5)
 rjmp	setupoutputs
 
-exit:
+_exit:
 cli
