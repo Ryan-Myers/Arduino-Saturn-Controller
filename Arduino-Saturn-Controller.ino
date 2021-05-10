@@ -22,10 +22,6 @@
  */
 
 volatile uint8_t OUTPUTS[4];
-volatile uint8_t OUTPUT0;
-volatile uint8_t OUTPUT1;
-volatile uint8_t OUTPUT2;
-volatile uint8_t OUTPUT3;
 
 void setup() 
 {
@@ -70,27 +66,11 @@ void setup()
   // Enable both interrupts
   EIMSK |= bit(INT0) | bit(INT1);
 
-  //Default outputs
-  //OUTPUT0 = B11110010; //ZYXR
-  //OUTPUT1 = B01110010; //UDLR
-  //OUTPUT2 = B11110010; //BCAS
-  //OUTPUT3 = B00110010; //L
-  //OUTPUTS[0] = B11110010; //ZYXR
-  //OUTPUTS[1] = B11110010; //UDLR
-  //OUTPUTS[2] = B11110010; //BCAS
-  //OUTPUTS[3] = B00110010; //L
-  
-  asm volatile(
-    "ldi   r16,0B11110010 \n"
-    "ldi   r17,0B01110010 \n"
-    "ldi   r18,0B11110010 \n"
-    "ldi   r19,0B00110010 \n"
-    :
-    :
-    :"r16","r17", "r18", "r19"
-  );
-  
-  //delay(1500);// Wait for the Saturn to start up.
+  //Default outputs to high which means unpressed.
+  OUTPUTS[0] = B11110010; //ZYXR
+  OUTPUTS[1] = B11110010; //UDLR
+  OUTPUTS[2] = B11110010; //BCAS
+  OUTPUTS[3] = B00110010; //L
 }
 
 //Interrupt when Saturn S0 (TH) pin changes
@@ -100,126 +80,90 @@ ISR (INT0_vect, ISR_NAKED)
       "sbis   %[rPIND],   0 \n"
       "rjmp   __TH0 \n"
       "sbis   %[rPIND],   1 \n"
-      "out    %[rPORTF],  r17 \n" //OUTPUT 1
+      "out    %[rPORTF],  %[OUTPUT1] \n" //OUTPUT 1
       "rjmp   __TH1 \n"
       "__TH0: \n"
       "sbis   %[rPIND],   1 \n"
-      "out    %[rPORTF],  r16 \n" //OUTPUT 0
+      "out    %[rPORTF],  %[OUTPUT0] \n" //OUTPUT 0
       "sbic   %[rPIND],   1 \n"
-      "out    %[rPORTF],  r18 \n" //OUTPUT 2
+      "out    %[rPORTF],  %[OUTPUT2] \n" //OUTPUT 2
       "reti   \n"
       "__TH1: \n"
       "sbis   %[rPIND],   1 \n"
       "reti   \n"
-      "out    %[rPORTF],  r19 \n" //OUTPUT 3
+      "out    %[rPORTF],  %[OUTPUT3] \n" //OUTPUT 3
       "reti   \n"
       :
       :
-        //[OUTPUT0]"r"(OUTPUT0),
-        //[OUTPUT1]"r"(OUTPUT1),
-        //[OUTPUT2]"r"(OUTPUT2),
-        //[OUTPUT3]"r"(OUTPUT3),
+        [OUTPUT0]"r"(OUTPUTS[0]),
+        [OUTPUT1]"r"(OUTPUTS[1]),
+        [OUTPUT2]"r"(OUTPUTS[2]),
+        [OUTPUT3]"r"(OUTPUTS[3]),
         [rPIND]"I"(_SFR_IO_ADDR(PIND)),
         [rPORTF]"I"(_SFR_IO_ADDR(PORTF))
       :
     );
 }
+/**
+ * Interrupt when Saturn S1 (TR) pin changes 
+ * This code is identical to the above with just different label names.
+ * I purposefully only used ASM that doesn't affect SREG so we didn't need to 
+ * do any PUSH and POPS on any registers.
+ * This is *just* not fast enough because the OUTPUTS first get loaded into registers
+ * and that uses 8 cycles.
+ */
 ISR (INT1_vect, ISR_NAKED)
 {
     asm volatile (
       "sbis   %[rPIND],   0 \n"
-      "rjmp   __TH01 \n"
+      "rjmp   __TH0v2 \n"
       "sbis   %[rPIND],   1 \n"
-      "out    %[rPORTF],  r17 \n" //OUTPUT 1
-      "rjmp   __TH10 \n"
-      "__TH01: \n"
+      "out    %[rPORTF],  %[OUTPUT1] \n"
+      "rjmp   __TH1v2 \n"
+      "__TH0v2: \n"
       "sbis   %[rPIND],   1 \n"
-      "out    %[rPORTF],  r16 \n" //OUTPUT 0
+      "out    %[rPORTF],  %[OUTPUT0] \n"
       "sbic   %[rPIND],   1 \n"
-      "out    %[rPORTF],  r18 \n" //OUTPUT 2
+      "out    %[rPORTF],  %[OUTPUT2] \n"
       "reti   \n"
-      "__TH10: \n"
+      "__TH1v2: \n"
       "sbis   %[rPIND],   1 \n"
       "reti   \n"
-      "out    %[rPORTF],  r19 \n" //OUTPUT 3
+      "out    %[rPORTF],  %[OUTPUT3] \n"
       "reti   \n"
       :
       :
-        //[OUTPUT0]"r"(OUTPUT0),
-        //[OUTPUT1]"r"(OUTPUT1),
-        //[OUTPUT2]"r"(OUTPUT2),
-        //[OUTPUT3]"r"(OUTPUT3),
+        [OUTPUT0]"r"(OUTPUTS[0]),
+        [OUTPUT1]"r"(OUTPUTS[1]),
+        [OUTPUT2]"r"(OUTPUTS[2]),
+        [OUTPUT3]"r"(OUTPUTS[3]),
         [rPIND]"I"(_SFR_IO_ADDR(PIND)),
         [rPORTF]"I"(_SFR_IO_ADDR(PORTF))
       :
     );
 }
 
+/**
+ * During the main loop, just continuosly update the values of the outputs so they're ready when the interrupts fire.
+ */
 void loop()
 {
-  asm volatile (
-    "ldi r16, 0b11110010 \n"
-    "ldi r17, 0b01110010 \n"
-    "ldi r18, 0b11110010 \n"
-    "ldi r19, 0b00110010 \n"
-    :
-    :
-    :"r16","r17", "r18", "r19"
-  );
-  /*
-  TXLED0;
-  delay(50);
-  TXLED1;
-  delay(50);*/
-  /*
-  asm volatile (
-      "loopstart:\n"
-      "sbis   %[rPIND],   0 \n"
-      "rjmp   __TH01 \n"
-      "sbis   %[rPIND],   1 \n"
-      "out    %[rPORTF],  %[OUTPUT1] \n" //OUTPUT 1
-      "rjmp   __TH10 \n"
-      "__TH01: \n"
-      "sbis   %[rPIND],   1 \n"
-      "out    %[rPORTF],  %[OUTPUT0] \n" //OUTPUT 0
-      "sbic   %[rPIND],   1 \n"
-      "out    %[rPORTF],  %[OUTPUT2] \n" //OUTPUT 2
-      "rjmp loopstart   \n"
-      "__TH10: \n"
-      "sbis   %[rPIND],   1 \n"
-      "rjmp loopstart   \n"
-      "out    %[rPORTF],  %[OUTPUT3] \n" //OUTPUT 3
-      "rjmp loopstart  \n"
-      :
-      :
-        [OUTPUT0]"r"(OUTPUT0),
-        [OUTPUT1]"r"(OUTPUT1),
-        [OUTPUT2]"r"(OUTPUT2),
-        [OUTPUT3]"r"(OUTPUT3),
-        [rPIND]"I"(_SFR_IO_ADDR(PIND)),
-        [rPORTF]"I"(_SFR_IO_ADDR(PORTF))
-      :
-    );*/
   //0:0    ZYXR--T-
   //PIND = Z--YXR--
-  OUTPUT0 = ((PIND & B10000010) | ((PIND & B00011100) << 2)) | B00000010;
-  //OUTPUTS[0] = B11110010;//((PIND & B10000010) | ((PIND & B00011100) << 2)) | B00000010;
+  OUTPUTS[0] = ((PIND & B10000010) | ((PIND & B00011100) << 2)) | B00000010;
   
   //0:1    UDLR--T-
   //PINB = ---UDLR-
-  OUTPUT1 = ((PINB & B00011110) << 3) | B00000010;
-  //OUTPUTS[1] = B01110010;//((PINB & B00011110) << 3) | B00000010;
+  OUTPUTS[1] = ((PINB & B00011110) << 3) | B00000010;
   
   //1:0    BCAS--T-
   //PINB = BCA-----
   //PINE = -S------
-  OUTPUT2 = ((PINB & B11100000) | ((PINE & B01000000) >> 2)) | B00000010;
-  //OUTPUTS[2] = B11110010;//((PINB & B11100000) | ((PINE & B01000000) >> 2)) | B00000010;
+  OUTPUTS[2] = ((PINB & B11100000) | ((PINE & B01000000) >> 2)) | B00000010;
   
   //1:1    001L--T-
   //PINC = -L------
   //For this one in particular we need to set 001L according to the documentation here (page 97):
   //https://cdn.preterhuman.net/texts/gaming_and_diversion/CONSOLES/sega/ST-169-R1-072694.pdf
-  OUTPUT3 = (((PINC & B01000000) >> 2) | B00100010);
-  //OUTPUTS[3] = B00110010;//(((PINC & B01000000) >> 2) | B00100010);
+  OUTPUTS[3] = (((PINC & B01000000) >> 2) | B00100010);
 }
