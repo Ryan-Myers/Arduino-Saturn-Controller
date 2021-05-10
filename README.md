@@ -7,12 +7,15 @@ You can optionally wire it to ATMega32u4 pin 40, which is PF1, and this code wil
 
 Once you've put all of this together, wire each button as below, combining it with GND on the other side. Setting buttons low is what triggers a button press.
 
-**Programming your Pro Micro**  
+## Programming your Pro Micro
 In order to program the Pro Micro, you'll need to do it manually. There is some INO Arduino IDE code, but it's not fast enough to work on the Sega Saturn due to extremely tight timings required. So you'll need to compile and flash the assembly code. I won't go into all of the details, but I've created a few scripts to help, they'll likely need editing in order to work on your machine though. I flashed my Pro Micro over ISP using another Arduino. (See [here](https://www.arduino.cc/en/Tutorial/BuiltInExamples/ArduinoISP) for more information)
 
 If using Microchip Studio (Formerly Atmel Studio), then load the MicrochipStudio.asm and compile with that.
 
 If you already have Arduino IDE, you can use the compile_asm.bat / compile_asm.sh to compile the Arduino-Saturn-Controller.asm code and then flash that output.
+
+## Wiring Diagram
+![Diagram](wiring-diagram-Micro-USB.png)
 
 
 | Controller | PORT | Pro Micro         |
