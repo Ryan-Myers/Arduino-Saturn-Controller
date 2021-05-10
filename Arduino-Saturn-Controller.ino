@@ -76,33 +76,37 @@ void setup()
 //Interrupt when Saturn S0 (TH) pin changes
 ISR (INT0_vect, ISR_NAKED)
 {
-    asm volatile (
-      "sbis   %[rPIND],   0 \n"
-      "rjmp   __TH0 \n"
-      "sbis   %[rPIND],   1 \n"
-      "out    %[rPORTF],  %[OUTPUT1] \n" //OUTPUT 1
-      "rjmp   __TH1 \n"
-      "__TH0: \n"
-      "sbis   %[rPIND],   1 \n"
-      "out    %[rPORTF],  %[OUTPUT0] \n" //OUTPUT 0
-      "sbic   %[rPIND],   1 \n"
-      "out    %[rPORTF],  %[OUTPUT2] \n" //OUTPUT 2
-      "reti   \n"
-      "__TH1: \n"
-      "sbis   %[rPIND],   1 \n"
-      "reti   \n"
-      "out    %[rPORTF],  %[OUTPUT3] \n" //OUTPUT 3
-      "reti   \n"
-      :
-      :
-        [OUTPUT0]"r"(OUTPUTS[0]),
-        [OUTPUT1]"r"(OUTPUTS[1]),
-        [OUTPUT2]"r"(OUTPUTS[2]),
-        [OUTPUT3]"r"(OUTPUTS[3]),
-        [rPIND]"I"(_SFR_IO_ADDR(PIND)),
-        [rPORTF]"I"(_SFR_IO_ADDR(PORTF))
-      :
-    );
+  //Ideally this is all I would be able to do, but it's too slow
+  //PORTF = OUTPUTS[PIND & 0B00000011];
+
+  //This is *very* close to good enough
+  asm volatile (
+    "sbis   %[rPIND],   0 \n"
+    "rjmp   __TH0 \n"
+    "sbis   %[rPIND],   1 \n"
+    "out    %[rPORTF],  %[OUTPUT1] \n" //OUTPUT 1
+    "rjmp   __TH1 \n"
+    "__TH0: \n"
+    "sbis   %[rPIND],   1 \n"
+    "out    %[rPORTF],  %[OUTPUT0] \n" //OUTPUT 0
+    "sbic   %[rPIND],   1 \n"
+    "out    %[rPORTF],  %[OUTPUT2] \n" //OUTPUT 2
+    "reti   \n"
+    "__TH1: \n"
+    "sbis   %[rPIND],   1 \n"
+    "reti   \n"
+    "out    %[rPORTF],  %[OUTPUT3] \n" //OUTPUT 3
+    "reti   \n"
+    :
+    :
+      [OUTPUT0]"r"(OUTPUTS[0]),
+      [OUTPUT1]"r"(OUTPUTS[1]),
+      [OUTPUT2]"r"(OUTPUTS[2]),
+      [OUTPUT3]"r"(OUTPUTS[3]),
+      [rPIND]"I"(_SFR_IO_ADDR(PIND)),
+      [rPORTF]"I"(_SFR_IO_ADDR(PORTF))
+    :
+  );
 }
 /**
  * Interrupt when Saturn S1 (TR) pin changes 
@@ -114,33 +118,37 @@ ISR (INT0_vect, ISR_NAKED)
  */
 ISR (INT1_vect, ISR_NAKED)
 {
-    asm volatile (
-      "sbis   %[rPIND],   0 \n"
-      "rjmp   __TH0v2 \n"
-      "sbis   %[rPIND],   1 \n"
-      "out    %[rPORTF],  %[OUTPUT1] \n"
-      "rjmp   __TH1v2 \n"
-      "__TH0v2: \n"
-      "sbis   %[rPIND],   1 \n"
-      "out    %[rPORTF],  %[OUTPUT0] \n"
-      "sbic   %[rPIND],   1 \n"
-      "out    %[rPORTF],  %[OUTPUT2] \n"
-      "reti   \n"
-      "__TH1v2: \n"
-      "sbis   %[rPIND],   1 \n"
-      "reti   \n"
-      "out    %[rPORTF],  %[OUTPUT3] \n"
-      "reti   \n"
-      :
-      :
-        [OUTPUT0]"r"(OUTPUTS[0]),
-        [OUTPUT1]"r"(OUTPUTS[1]),
-        [OUTPUT2]"r"(OUTPUTS[2]),
-        [OUTPUT3]"r"(OUTPUTS[3]),
-        [rPIND]"I"(_SFR_IO_ADDR(PIND)),
-        [rPORTF]"I"(_SFR_IO_ADDR(PORTF))
-      :
-    );
+  //Ideally this is all I would be able to do, but it's too slow
+  //PORTF = OUTPUTS[PIND & 0B00000011];
+
+  //This is *very* close to good enough
+  asm volatile (
+    "sbis   %[rPIND],   0 \n"
+    "rjmp   __TH0v2 \n"
+    "sbis   %[rPIND],   1 \n"
+    "out    %[rPORTF],  %[OUTPUT1] \n"
+    "rjmp   __TH1v2 \n"
+    "__TH0v2: \n"
+    "sbis   %[rPIND],   1 \n"
+    "out    %[rPORTF],  %[OUTPUT0] \n"
+    "sbic   %[rPIND],   1 \n"
+    "out    %[rPORTF],  %[OUTPUT2] \n"
+    "reti   \n"
+    "__TH1v2: \n"
+    "sbis   %[rPIND],   1 \n"
+    "reti   \n"
+    "out    %[rPORTF],  %[OUTPUT3] \n"
+    "reti   \n"
+    :
+    :
+      [OUTPUT0]"r"(OUTPUTS[0]),
+      [OUTPUT1]"r"(OUTPUTS[1]),
+      [OUTPUT2]"r"(OUTPUTS[2]),
+      [OUTPUT3]"r"(OUTPUTS[3]),
+      [rPIND]"I"(_SFR_IO_ADDR(PIND)),
+      [rPORTF]"I"(_SFR_IO_ADDR(PORTF))
+    :
+  );
 }
 
 /**
