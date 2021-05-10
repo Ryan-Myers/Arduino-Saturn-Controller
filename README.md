@@ -1,5 +1,5 @@
 # Arduino-Saturn-Controller
-Emulates a Sega Saturn controller using an SparkFun (Arduino) Pro Micro. This uses all available pins on the Pro Micro, as well as one that isn't on the breakout. That will require you to solder direct to the ATmega32U4 pin 12. (Refer to page 3 of [this datasheet](https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7766-8-bit-AVR-ATmega16U4-32U4_Datasheet.pdf))
+Emulates a Sega Saturn controller using an SparkFun (Arduino) Pro Micro. This uses all available pins on the Pro Micro, as well as one that isn't on the breakout. That will require you to solder direct to the ATmega32U4 pin 12. (Refer to page 3 of [this datasheet](https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7766-8-bit-AVR-ATmega16U4-32U4_Datasheet.pdf)). I recommend using a version of the Pro Micro that is Mini USB as opposed to the far more common Micro USB. The reaosn is that it's easier to solder directly to the Atmega32U4. I've included wiring diagrams for both and it should work with either.
 
 Wire up the Sega Saturn Controller cable according the chart below, using [this reference](https://gamesx.com/controldata/saturn.htm) where +5v (Inp) is TL ACK, and VCC is connected to Arduino VCC. 
 Just wire TL ACK to VCC for simplicities sake as we're always setting it high as per Sega spec for the Saturn Controller [page 97](https://cdn.preterhuman.net/texts/gaming_and_diversion/CONSOLES/sega/ST-169-R1-072694.pdf).
@@ -14,8 +14,9 @@ If using Microchip Studio (Formerly Atmel Studio), then load the MicrochipStudio
 
 If you already have Arduino IDE, you can use the compile_asm.bat / compile_asm.sh to compile the Arduino-Saturn-Controller.asm code and then flash that output.
 
-## Wiring Diagram
-![Diagram](wiring-diagram-Micro-USB.png)
+## Wiring Diagrams
+![DiagramMicro](wiring-diagram-Micro-USB.png)
+![DiagramMini](wiring-diagram-Mini-USB.png)
 
 
 | Controller | PORT | Pro Micro         |
