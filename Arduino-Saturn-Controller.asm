@@ -66,7 +66,7 @@ ZH      = 31  ;Z High byte
 __vectors:
 jmp __reset         ;Reset Handler
 jmp __vector_1      ;IRQ0 External Interrupt Handler
-jmp __vector_2      ;IRQ1 External Interrupt Handler
+jmp __vector_1      ;IRQ1 External Interrupt Handler
 jmp __bad_interrupt
 jmp __bad_interrupt
 jmp __bad_interrupt
@@ -124,29 +124,15 @@ jmp   0
 
 ;/**
 ; * Interrupt when Saturn S1 (TR) pin changes 
-; * This code is identical to below with just different label names.
-; * I purposefully only used ASM that doesn't affect SREG so we didn't need to 
-; * do any PUSH and POPS on any registers.
+; * Interrupt when Saturn S0 (TH) pin changes
+; * I purposefully only used ASM that doesn't affect SREG 
+; * and doesn't write to any registers so we didn't need to 
+; * do any PUSH and POPS which saves several cycles.
 ; */
-__vector_2:
-sbis  PIND,   PD0     ;PD0 = 1?
-rjmp  __TH0v2         ;PD0 = 0
-sbis  PIND,   PD1     ;PD1 = 1? PD0 = 1
-out   PORTF,  OUTPUT1 ;PD1 = 0 So TH1:TR0
-rjmp  __TH1TR1v2      ;PD1 = 1 (Or 0 after above finished)
-__TH0v2:
-sbis  PIND,   PD1     ;PD1 = 1?
-out   PORTF,  OUTPUT0 ;PD1 = 0 So TH0:TR0
-sbic  PIND,   PD1     ;PD1 = 0?
-out   PORTF,  OUTPUT2 ;PD1 = 1 So TH0:TR1
-reti                  ;Exit
-__TH1TR1v2:           ;This technically gets called when TH1:TR0 as well
-sbis  PIND,   PD1     ;PD1 = 0?
-reti                  ;Exit
-out   PORTF,  OUTPUT3 ;PD1 = l So TH1:TR1
-reti                  ;Exit
-
-;Interrupt when Saturn S0 (TH) pin changes
+;0 = 1 + 2 + 1 + 1 + 2 + 5 = 12 cycles
+;1 = 2 + 1 + 1 + 2 + 1 + 5 = 12 cycles
+;2 = 1 + 2 + 2 + 1 + 1 + 5 = 12 cycles
+;3 = 2 + 2 + 2 + 2 + 1 + 5 = 14 cycles
 __vector_1:
 sbis  PIND,   PD0     ;PD0 = 1?
 rjmp  __TH0           ;PD0 = 0
