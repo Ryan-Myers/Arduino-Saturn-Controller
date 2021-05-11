@@ -14,9 +14,13 @@ If using Microchip Studio (Formerly Atmel Studio), then load the MicrochipStudio
 
 If you already have Arduino IDE, you can use the compile_asm.bat / compile_asm.sh to compile the Arduino-Saturn-Controller.asm code and then flash that output.
 
+## Teensy 2.0
+After developing this, I discovered the Teensy 2.0 uses the same ATmega32U4 chip as the Pro Micro. It also exposes all of the required pins without directly soldering onto the chip, and is available in a smaller size than the others. It's a little bit more expensive, but it would be easier for beginners to use. It's completely untested, but I've included a wiring diagram for it below. It will also get programmed through ISP the same as above. I won't build a guide for this, but it shouldn't be difficult with some research.
+
 ## Wiring Diagrams
 ![DiagramMicro](wiring-diagram-Micro-USB.png)
 ![DiagramMini](wiring-diagram-Mini-USB.png)
+![DiagramTeensy](wiring-diagram-teensy.png)
 
 
 | Controller | PORT | Pro Micro         |
