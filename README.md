@@ -41,7 +41,7 @@ After developing this, I discovered the Teensy 2.0 uses the same ATmega32U4 chip
 
 |PORTB| Pro Micro          | Usage                |
 |-----|--------------------|----------------------|
-| PB0 | Pin 8  D17         | (Not Used)           |
+| PB0 | RXLED (Pin 8 D17)  | (Remove Resistor)    |
 | PB1 | Pro Micro 15       | **Controller Right** |
 | PB2 | Pro Micro 16       | **Controller Left**  |
 | PB3 | Pro Micro 14       | **Controller Down**  |
@@ -68,7 +68,7 @@ After developing this, I discovered the Teensy 2.0 uses the same ATmega32U4 chip
 | PD2 | Pro Micro RXI      | **Controller R**     |
 | PD3 | Pro Micro TXO      | **Controller X**     |
 | PD4 | Pro Micro 4        | **Controller Y**     |
-| PD5 | TXLED              | (Unusable)           |
+| PD5 | TXLED (Pin 22)     | (Rmeove Resistor)    |
 | PD6 | Pin 26 on Chip     | (Not Used)           |
 | PD7 | Pro Micro 6        | **Controller Z**     |
  
